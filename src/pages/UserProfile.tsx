@@ -108,7 +108,7 @@ const UserProfile = () => {
             <button
               onClick={handleToggleFollow}
               disabled={followBusy}
-              className={`text-xs font-bold px-4 py-1.5 rounded disabled:opacity-50 ${
+              className={`text-sm font-bold px-4 py-1.5 rounded disabled:opacity-50 ${
                 following
                   ? 'border border-emerald-500 text-emerald-300 hover:bg-emerald-500/10'
                   : 'bg-emerald-500 text-black hover:bg-emerald-600'

@@ -118,7 +118,7 @@ const Feed = () => {
           className="w-full bg-transparent border border-emerald-500 rounded p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 resize-none"
         />
         <div className="flex items-center justify-between mt-3">
-          <span className="text-xs text-emerald-200">{content.length}/500</span>
+          <span className="text-sm text-emerald-200">{content.length}/500</span>
           <button
             type="submit"
             disabled={posting || content.trim().length === 0}

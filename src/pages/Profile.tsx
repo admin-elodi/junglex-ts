@@ -131,7 +131,7 @@ const Profile = () => {
               </div>
               <button
                 onClick={() => setIsEditing(true)}
-                className="text-xs text-emerald-300 hover:text-emerald-100 border border-emerald-500 rounded px-3 py-1.5"
+                className="text-sm text-emerald-300 hover:text-emerald-100 border border-emerald-500 rounded px-3 py-1.5"
               >
                 Edit Profile
               </button>
@@ -150,7 +150,7 @@ const Profile = () => {
 
             <button
               onClick={() => setIsAnimalModalOpen(true)}
-              className="mt-4 text-xs text-emerald-300 hover:text-emerald-100 underline"
+              className="mt-4 text-sm text-emerald-300 hover:text-emerald-100 underline"
             >
               Change spirit animal
             </button>

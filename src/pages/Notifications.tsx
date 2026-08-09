@@ -63,7 +63,7 @@ const Notifications = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl text-emerald-300 font-bold">Notifications</h1>
         {unreadCount > 0 && (
-          <button onClick={handleMarkAllRead} className="text-xs text-emerald-300 hover:text-emerald-100 underline">
+          <button onClick={handleMarkAllRead} className="text-sm text-emerald-300 hover:text-emerald-100 underline">
             Mark all as read
           </button>
         )}
@@ -99,7 +99,7 @@ const Notifications = () => {
                   started following you
                 </p>
               )}
-              <p className="text-[11px] text-gray-400 mt-1">{timeAgo(n.created_at)}</p>
+              <p className="text-sm text-gray-400 mt-1">{timeAgo(n.created_at)}</p>
             </div>
           ))}
         </div>

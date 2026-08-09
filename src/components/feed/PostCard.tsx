@@ -82,7 +82,7 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
       }`}
     >
       {post.is_historic && (
-        <p className="text-[10px] uppercase tracking-widest text-emerald-400 mb-2">● Historic first post</p>
+        <p className="text-sm uppercase tracking-widest text-emerald-400 mb-2">● Historic first post</p>
       )}
 
       <div className="flex items-center justify-between mb-2">
@@ -96,7 +96,7 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
         ) : (
           <p className="text-white font-bold">{post.author_username}</p>
         )}
-        <p className="text-[11px] text-emerald-200">
+        <p className="text-sm text-emerald-200">
           {timeAgo(post.created_at)}
           {post.edited_at && ' · edited'}
         </p>
@@ -115,7 +115,7 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
             <button
               onClick={handleSaveEdit}
               disabled={saving}
-              className="bg-emerald-500 text-black text-xs font-bold px-3 py-1.5 rounded hover:bg-emerald-600 disabled:opacity-50"
+              className="bg-emerald-500 text-black text-sm font-bold px-3 py-1.5 rounded hover:bg-emerald-600 disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save'}
             </button>
@@ -124,7 +124,7 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
                 setIsEditing(false);
                 setEditContent(post.content);
               }}
-              className="text-xs text-gray-400 px-3 py-1.5"
+              className="text-sm text-gray-400 px-3 py-1.5"
             >
               Cancel
             </button>
@@ -134,7 +134,7 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
         <p className="text-white/90 leading-relaxed whitespace-pre-wrap">{post.content}</p>
       )}
 
-      {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+      {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
 
       <div className="flex items-center gap-2 mt-4">
         {REACTION_TYPES.map(({ type, label, emoji }) => {
@@ -151,18 +151,18 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
               }`}
             >
               <span>{emoji}</span>
-              <span className="text-xs">{count}</span>
+              <span className="text-sm">{count}</span>
             </button>
           );
         })}
 
         {isOwn && !isEditing && !post.is_historic && (
           <div className="ml-auto flex items-center gap-3">
-            <button onClick={() => setIsEditing(true)} className="text-xs text-emerald-300 hover:text-emerald-100">
+            <button onClick={() => setIsEditing(true)} className="text-sm text-emerald-300 hover:text-emerald-100">
               Edit
             </button>
             {confirmDelete ? (
-              <span className="text-xs text-gray-400 flex items-center gap-2">
+              <span className="text-sm text-gray-400 flex items-center gap-2">
                 Delete this post?
                 <button onClick={handleDelete} disabled={deleting} className="text-red-400 hover:text-red-300">
                   {deleting ? 'Deleting...' : 'Yes'}
@@ -172,7 +172,7 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
                 </button>
               </span>
             ) : (
-              <button onClick={() => setConfirmDelete(true)} className="text-xs text-red-400 hover:text-red-300">
+              <button onClick={() => setConfirmDelete(true)} className="text-sm text-red-400 hover:text-red-300">
                 Delete
               </button>
             )}
