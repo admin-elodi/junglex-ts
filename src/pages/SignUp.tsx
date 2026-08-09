@@ -63,10 +63,11 @@ const SignUp = () => {
         email,
         password,
         username,
+        spiritAnimal,
       });
 
       // 🔥 success → go to dashboard (or verification page later)
-      navigate('/app/dashboard');
+      navigate('/app/feed');
 
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
@@ -122,54 +123,74 @@ const SignUp = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          <input
-            name="username"
-            placeholder="Username"
-            onChange={handleChange}
-            className="w-full p-2 border border-emerald-500 bg-transparent text-white"
-          />
+          <div>
+            <label className="text-sm text-emerald-200 block mb-1">
+              Username
+            </label>
+            <input
+              name="username"
+              placeholder="Your username"
+              onChange={handleChange}
+              className="w-full p-2 rounded border-2 border-emerald-500 bg-black/30 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            />
+          </div>
 
-          <input
-            name="email"
-            placeholder="Email"
-            onChange={handleChange}
-            className="w-full p-2 border border-emerald-500 bg-transparent text-white"
-          />
+          <div>
+            <label className="text-sm text-emerald-200 block mb-1">
+              Email
+            </label>
+            <input
+              name="email"
+              placeholder="Your email"
+              onChange={handleChange}
+              className="w-full p-2 rounded border-2 border-emerald-500 bg-black/30 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            />
+          </div>
 
           {/* 🔐 PASSWORD */}
-          <div className="relative">
-            <input
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              onChange={handleChange}
-              className="w-full p-2 border border-emerald-500 bg-transparent text-white"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((p) => !p)}
-              className="absolute right-2 top-2 text-xs text-emerald-300"
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
+          <div>
+            <label className="text-sm text-emerald-200 block mb-1">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Your password"
+                onChange={handleChange}
+                className="w-full p-2 rounded border-2 border-emerald-500 bg-black/30 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                className="absolute right-2 top-2 text-xs text-emerald-300"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           {/* 🔐 CONFIRM PASSWORD */}
-          <div className="relative">
-            <input
-              name="confirmPassword"
-              type={showConfirm ? 'text' : 'password'}
-              placeholder="Confirm Password"
-              onChange={handleChange}
-              className="w-full p-2 border border-emerald-500 bg-transparent text-white"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirm((p) => !p)}
-              className="absolute right-2 top-2 text-xs text-emerald-300"
-            >
-              {showConfirm ? 'Hide' : 'Show'}
-            </button>
+          <div>
+            <label className="text-sm text-emerald-200 block mb-1">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <input
+                name="confirmPassword"
+                type={showConfirm ? 'text' : 'password'}
+                placeholder="Confirm your password"
+                onChange={handleChange}
+                className="w-full p-2 rounded border-2 border-emerald-500 bg-black/30 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((p) => !p)}
+                className="absolute right-2 top-2 text-xs text-emerald-300"
+              >
+                {showConfirm ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           {/* 🐾 SPIRIT ANIMAL */}
@@ -181,7 +202,7 @@ const SignUp = () => {
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
-              className="border border-emerald-500 px-4 py-2 text-white w-full"
+              className="border-2 border-emerald-500 rounded px-4 py-2 text-white w-full bg-black/30"
             >
               {form.spiritAnimal || 'Select Your Animal'}
             </button>

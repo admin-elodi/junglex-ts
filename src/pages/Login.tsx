@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@context/AuthContext';
 
 // 🔥 replace these with your actual assets
 import bgImage from '@assets/images/spirit-animals/king.webp';
@@ -13,6 +14,9 @@ type FormData = {
 };
 
 const Login = () => {
+  const { signIn, resendConfirmation } = useAuth();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -20,6 +24,9 @@ const Login = () => {
 
   const [error, setError] = useState<string>('');
   const [language, setLanguage] = useState<string>('en');
+  const [showPassword, setShowPassword] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -30,9 +37,11 @@ const Login = () => {
     setLanguage(e.target.value);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    setNeedsConfirmation(false);
+    setResendStatus('idle');
 
     if (!formData.email.includes('@')) {
       setError('Enter a valid email');
@@ -44,7 +53,31 @@ const Login = () => {
       return;
     }
 
-    console.log('Login:', formData);
+    try {
+      await signIn({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      navigate('/app/feed');
+    } catch (err: any) {
+      const message = err.message || 'Invalid email or password';
+      setError(message);
+
+      if (message.toLowerCase().includes('email not confirmed')) {
+        setNeedsConfirmation(true);
+      }
+    }
+  };
+
+  const handleResend = async () => {
+    setResendStatus('sending');
+    try {
+      await resendConfirmation(formData.email);
+      setResendStatus('sent');
+    } catch {
+      setResendStatus('error');
+    }
   };
 
   return (
@@ -116,18 +149,53 @@ const Login = () => {
             <label className="text-sm text-emerald-200 block mb-1">
               Password
             </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-3 py-2 bg-transparent border border-emerald-500 rounded text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
-              placeholder="Your password"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-3 py-2 bg-transparent border border-emerald-500 rounded text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                placeholder="Your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-emerald-300"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           {error && (
             <p className="text-red-400 text-xs text-center">{error}</p>
+          )}
+
+          {needsConfirmation && (
+            <div className="text-center">
+              {resendStatus === 'sent' ? (
+                <p className="text-emerald-300 text-xs">
+                  Confirmation email sent — check your inbox.
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendStatus === 'sending'}
+                  className="text-emerald-300 text-xs underline hover:text-emerald-100 disabled:opacity-50"
+                >
+                  {resendStatus === 'sending'
+                    ? 'Resending...'
+                    : 'Resend confirmation email'}
+                </button>
+              )}
+              {resendStatus === 'error' && (
+                <p className="text-red-400 text-xs mt-1">
+                  Could not resend — try again in a moment.
+                </p>
+              )}
+            </div>
           )}
 
           <Motion.button

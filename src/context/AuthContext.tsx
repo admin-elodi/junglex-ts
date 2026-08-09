@@ -3,29 +3,41 @@ import { supabase } from '@lib/supabase';
 
 type AuthContextType = {
   user: any;
+  loading: boolean;
   signUp: (data: {
     email: string;
     password: string;
     username: string;
+    spiritAnimal: string;
   }) => Promise<void>;
   signIn: (data: {
     email: string;
     password: string;
   }) => Promise<void>;
   signOut: () => Promise<void>;
+  resendConfirmation: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   // 🔁 Persist session
   useEffect(() => {
+    // Resolve whatever session already exists (page refresh, etc.) before
+    // route guards make any redirect decisions.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -36,10 +48,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     email,
     password,
     username,
+    spiritAnimal,
   }: {
     email: string;
     password: string;
     username: string;
+    spiritAnimal: string;
   }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -47,6 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       options: {
         data: {
           username,
+          spirit_animal: spiritAnimal,
         },
       },
     });
@@ -80,8 +95,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
   };
 
+  // ✉️ RESEND CONFIRMATION EMAIL
+  const resendConfirmation = async (email: string) => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+    });
+
+    if (error) throw error;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut, resendConfirmation }}>
       {children}
     </AuthContext.Provider>
   );
