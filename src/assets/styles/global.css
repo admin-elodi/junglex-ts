@@ -1,0 +1,53 @@
+:root {
+  --savanna-ochre: #D4A017;
+  --baobab-green: #2E7D32;
+  --ankh-red: #C62828;
+  --sahara-beige: #F5E8C7;
+  --sand: #E8D7A5;
+}
+
+@media (max-width: 767px) {
+  .min-h-screen {
+    padding: 1rem;
+  }
+
+  .text-4xl {
+    font-size: 2rem;
+  }
+
+  .text-lg {
+    font-size: 0.875rem;
+  }
+
+  .max-w-md {
+    max-width: 100%;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+
+  .w-12 {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .min-h-\[50vh\] {
+    min-height: 50vh;
+  }
+}
+
+@media (min-width: 768px) {
+  .min-h-screen {
+    padding: 2rem;
+  }
+
+  .w-16 {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .max-w-md {
+    max-width: 28rem; /* Matches SignUp.jsx form width */
+  }
+}
