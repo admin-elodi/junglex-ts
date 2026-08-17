@@ -10,6 +10,7 @@ import {
   type Reaction,
 } from '@lib/posts';
 import { fetchCommentCount, fetchComments, createComment, deleteComment, type Comment } from '@lib/comments';
+import { fetchProfilesByIds, type Profile } from '@lib/profiles';
 
 const timeAgo = (iso: string) => {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -43,6 +44,7 @@ const PostCard = ({ post, reactions, authorUsername, onChanged }: Props) => {
   const [commentCount, setCommentCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [commentAuthorProfiles, setCommentAuthorProfiles] = useState<Record<string, Profile>>({});
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [postingComment, setPostingComment] = useState(false);
@@ -54,7 +56,10 @@ const PostCard = ({ post, reactions, authorUsername, onChanged }: Props) => {
   const loadComments = async () => {
     setLoadingComments(true);
     try {
-      setComments(await fetchComments(post.id));
+      const fetchedComments = await fetchComments(post.id);
+      setComments(fetchedComments);
+      const authorIds = [...new Set(fetchedComments.map((c) => c.author_id))];
+      setCommentAuthorProfiles(await fetchProfilesByIds(authorIds));
     } catch (err: any) {
       setError(err.message || 'Could not load comments');
     } finally {
@@ -260,7 +265,9 @@ const PostCard = ({ post, reactions, authorUsername, onChanged }: Props) => {
             comments.map((c) => (
               <div key={c.id} className="flex items-start justify-between gap-2">
                 <div>
-                  <span className="text-sm font-bold text-emerald-300">{c.author_username}</span>{' '}
+                  <span className="text-sm font-bold text-emerald-300">
+                    {commentAuthorProfiles[c.author_id]?.username ?? c.author_username}
+                  </span>{' '}
                   <span className="text-sm text-white/90">{c.content}</span>
                   <p className="text-xs text-gray-500">{timeAgo(c.created_at)}</p>
                 </div>
