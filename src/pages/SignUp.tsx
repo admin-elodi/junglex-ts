@@ -31,6 +31,7 @@ const SignUp = () => {
 
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -59,15 +60,18 @@ const SignUp = () => {
     try {
       setLoading(true);
 
-      await signUp({
+      const { confirmed } = await signUp({
         email,
         password,
         username,
         spiritAnimal,
       });
 
-      // 🔥 success → go to dashboard (or verification page later)
-      navigate('/app/feed');
+      if (confirmed) {
+        navigate('/app/feed');
+      } else {
+        setAwaitingConfirmation(true);
+      }
 
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
@@ -117,6 +121,22 @@ const SignUp = () => {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
       >
+        {awaitingConfirmation ? (
+          <div className="text-center py-4">
+            <h2 className="text-2xl text-emerald-300 mb-3">Check your email</h2>
+            <p className="text-white/80 text-sm mb-4">
+              We sent a confirmation link to <span className="text-emerald-300">{form.email}</span>.
+              Click it, then come back and log in.
+            </p>
+            <Link
+              to="/"
+              className="inline-block bg-emerald-500 text-black font-bold px-5 py-2 rounded hover:bg-emerald-600"
+            >
+              Go to Login
+            </Link>
+          </div>
+        ) : (
+        <>
         <h2 className="text-2xl text-emerald-300 text-center mb-4">
           Sign Up
         </h2>
@@ -231,6 +251,8 @@ const SignUp = () => {
         >
           Already have an account?
         </Link>
+        </>
+        )}
       </Motion.div>
 
       {/* 🐾 MODAL */}

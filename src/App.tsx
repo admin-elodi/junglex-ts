@@ -11,63 +11,71 @@ import Bookmarks from '@pages/Bookmarks';
 import Terms from '@pages/Terms';
 import Privacy from '@pages/Privacy';
 import Cookies from '@pages/Cookies';
+import NotFound from '@pages/NotFound';
 
 import { AuthProvider } from '@context/AuthContext';
 import AppShell from '@components/layout/AppShell';
 import ProtectedRoute from '@routes/ProtectedRoute';
 import PublicRoute from '@routes/PublicRoute';
+import ErrorBoundary from '@components/shared/ErrorBoundary';
 
 const App = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <Routes>
 
-          {/* PUBLIC ROUTES — redirect to /app/dashboard if already logged in */}
-          <Route
-            path="/"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <PublicRoute>
-                <SignUp />
-              </PublicRoute>
-            }
-          />
+            {/* PUBLIC ROUTES — redirect to /app/feed if already logged in */}
+            <Route
+              path="/"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <PublicRoute>
+                  <SignUp />
+                </PublicRoute>
+              }
+            />
 
-          {/* LEGAL PAGES — public, no auth required */}
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/cookies" element={<Cookies />} />
+            {/* LEGAL PAGES — public, no auth required */}
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/cookies" element={<Cookies />} />
 
-          {/* PROTECTED APP AREA — redirect to / if not logged in */}
-          <Route
-            path="/app/*"
-            element={
-              <ProtectedRoute>
-                <AppShell>
-                  <Routes>
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="feed" element={<Feed />} />
-                    <Route path="profile" element={<Profile />} />
-                    <Route path="u/:username" element={<UserProfile />} />
-                    <Route path="notifications" element={<Notifications />} />
-                    <Route path="bookmarks" element={<Bookmarks />} />
-                  </Routes>
-                </AppShell>
-              </ProtectedRoute>
-            }
-          />
+            {/* PROTECTED APP AREA — redirect to / if not logged in */}
+            <Route
+              path="/app/*"
+              element={
+                <ProtectedRoute>
+                  <AppShell>
+                    <Routes>
+                      <Route path="dashboard" element={<Dashboard />} />
+                      <Route path="feed" element={<Feed />} />
+                      <Route path="profile" element={<Profile />} />
+                      <Route path="u/:username" element={<UserProfile />} />
+                      <Route path="notifications" element={<Notifications />} />
+                      <Route path="bookmarks" element={<Bookmarks />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </AppShell>
+                </ProtectedRoute>
+              }
+            />
 
-        </Routes>
-      </Router>
-    </AuthProvider>
+            {/* CATCH-ALL — any unmatched top-level path */}
+            <Route path="*" element={<NotFound />} />
+
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };
 

@@ -9,7 +9,7 @@ type AuthContextType = {
     password: string;
     username: string;
     spiritAnimal: string;
-  }) => Promise<void>;
+  }) => Promise<{ confirmed: boolean }>;
   signIn: (data: {
     email: string;
     password: string;
@@ -68,7 +68,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (error) throw error;
 
-    setUser(data.user);
+    // If email confirmation is required, Supabase creates the account but
+    // does NOT issue a session yet — the account is not actually
+    // authenticated until the link is clicked. Setting `user` here anyway
+    // would show a false "logged in" state where every RLS-protected write
+    // (like posting) fails, because auth.uid() is null server-side. So we
+    // only update local state if a real session came back; onAuthStateChange
+    // above handles it for us in that case.
+    return { confirmed: !!data.session };
   };
 
   // 🔐 SIGN IN
@@ -79,14 +86,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     email: string;
     password: string;
   }) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) throw error;
-
-    setUser(data.user);
+    // onAuthStateChange picks up the resulting session automatically.
   };
 
   // 🚪 SIGN OUT

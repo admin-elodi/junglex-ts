@@ -59,7 +59,11 @@ const Profile = () => {
       setIsEditing(false);
       await loadAll();
     } catch (err: any) {
-      setError(err.message || 'Could not save your profile');
+      if (err.code === '23505' || /duplicate|unique/i.test(err.message || '')) {
+        setError('That username is already taken — try another one.');
+      } else {
+        setError(err.message || 'Could not save your profile');
+      }
     } finally {
       setSaving(false);
     }

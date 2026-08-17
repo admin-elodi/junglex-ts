@@ -16,6 +16,8 @@ const Feed = () => {
   const [tab, setTab] = useState<Tab>('everyone');
   const [content, setContent] = useState('');
   const [posting, setPosting] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
+  const [cooldownTick, setCooldownTick] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -81,13 +83,34 @@ const Feed = () => {
         content: content.trim(),
       });
       setContent('');
+      setCooldownUntil(Date.now() + 15000);
       await loadAll();
     } catch (err: any) {
-      setError(err.message || 'Could not send that post');
+      if (/posting too fast/i.test(err.message || '')) {
+        setError('Slow down a little — you can post again in a few seconds.');
+      } else {
+        setError(err.message || 'Could not send that post');
+      }
     } finally {
       setPosting(false);
     }
   };
+
+  useEffect(() => {
+    if (!cooldownUntil) return;
+    const interval = setInterval(() => {
+      if (Date.now() >= cooldownUntil) {
+        setCooldownUntil(null);
+        clearInterval(interval);
+      } else {
+        setCooldownTick((t) => t + 1);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, [cooldownUntil]);
+
+  const secondsLeft = cooldownUntil ? Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000)) : 0;
+  void cooldownTick; // forces a re-render each tick so secondsLeft stays live
 
   return (
     <div className="max-w-2xl">
@@ -121,10 +144,10 @@ const Feed = () => {
           <span className="text-sm text-emerald-200">{content.length}/500</span>
           <button
             type="submit"
-            disabled={posting || content.trim().length === 0}
+            disabled={posting || content.trim().length === 0 || !!cooldownUntil}
             className="bg-emerald-500 text-black font-bold px-5 py-2 rounded hover:bg-emerald-600 disabled:opacity-40"
           >
-            {posting ? 'Posting...' : 'Post'}
+            {posting ? 'Posting...' : cooldownUntil ? `Wait ${secondsLeft}s` : 'Post'}
           </button>
         </div>
       </form>
