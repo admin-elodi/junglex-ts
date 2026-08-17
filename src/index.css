@@ -1,26 +1,16 @@
 @import "tailwindcss";
 
-@theme {
-  /* Color — grounded in earth/clay, not paper-cream or matte-black */
-  --color-earth: #2a1b12;        /* base background — baked clay */
-  --color-earth-deep: #1f130c;   /* darkest recess, footer/overlays */
-  --color-clay: #3e2a1c;         /* card / surface */
-  --color-clay-soft: #4c3524;    /* hover / alt surface */
-  --color-copper: #c9772e;       /* primary accent */
-  --color-copper-bright: #e4a052;/* hover state for copper */
-  --color-kente: #2f5d45;        /* secondary accent — deep bottle green */
-  --color-kente-bright: #457763;
-  --color-ivory: #f3e6cc;        /* headings / primary text on dark */
-  --color-tan: #c7a879;          /* muted body text on dark */
-  --color-border-warm: #5c3d26;  /* hairline borders */
-
-  /* Type */
-  --font-display: "Fraunces", ui-serif, serif;
-  --font-body: "Work Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+/* Explicit black on the real page background — without this, any gap not
+   covered by the app's own bg-black divs (overscroll bounce, initial paint
+   before React mounts) falls back to the browser default of white, which
+   Android Chrome's forced-dark mode then inverts into a sepia/brown tint
+   instead of black. */
+html,
+body {
+  background-color: #000;
+  height: 100%;
 }
 
-body {
-  font-family: var(--font-body);
-  background-color: var(--color-earth);
+#root {
+  min-height: 100%;
 }

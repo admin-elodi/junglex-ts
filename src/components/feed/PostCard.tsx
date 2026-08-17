@@ -197,7 +197,7 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
 
       {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
 
-      <div className="flex items-center gap-2 mt-4">
+      <div className="flex items-center gap-2 mt-4 flex-wrap">
         {REACTION_TYPES.map(({ type, label, emoji }) => {
           const count = reactions.filter((r) => r.type === type).length;
           const reactedByMe = user ? reactions.some((r) => r.type === type && r.user_id === user.id) : false;
@@ -224,30 +224,30 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
           <span>💬</span>
           <span className="text-sm">{commentCount}</span>
         </button>
-
-        {isOwn && !isEditing && !post.is_historic && (
-          <div className="ml-auto flex items-center gap-3">
-            <button onClick={() => setIsEditing(true)} className="text-sm text-emerald-300 hover:text-emerald-100">
-              Edit
-            </button>
-            {confirmDelete ? (
-              <span className="text-sm text-gray-400 flex items-center gap-2">
-                Delete this post?
-                <button onClick={handleDelete} disabled={deleting} className="text-red-400 hover:text-red-300">
-                  {deleting ? 'Deleting...' : 'Yes'}
-                </button>
-                <button onClick={() => setConfirmDelete(false)} className="hover:text-white">
-                  No
-                </button>
-              </span>
-            ) : (
-              <button onClick={() => setConfirmDelete(true)} className="text-sm text-red-400 hover:text-red-300">
-                Delete
-              </button>
-            )}
-          </div>
-        )}
       </div>
+
+      {isOwn && !isEditing && !post.is_historic && (
+        <div className="flex items-center justify-end gap-3 mt-2">
+          <button onClick={() => setIsEditing(true)} className="text-sm text-emerald-300 hover:text-emerald-100">
+            Edit
+          </button>
+          {confirmDelete ? (
+            <span className="text-sm text-gray-400 flex items-center gap-2">
+              Delete this post?
+              <button onClick={handleDelete} disabled={deleting} className="text-red-400 hover:text-red-300">
+                {deleting ? 'Deleting...' : 'Yes'}
+              </button>
+              <button onClick={() => setConfirmDelete(false)} className="hover:text-white">
+                No
+              </button>
+            </span>
+          ) : (
+            <button onClick={() => setConfirmDelete(true)} className="text-sm text-red-400 hover:text-red-300">
+              Delete
+            </button>
+          )}
+        </div>
+      )}
 
       {showComments && (
         <div className="mt-4 pt-4 border-t border-emerald-700/50 space-y-3">
