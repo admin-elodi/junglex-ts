@@ -5,7 +5,7 @@ export type Notification = {
   recipient_id: string;
   actor_id: string | null;
   actor_username: string;
-  type: 'reaction' | 'follow';
+  type: 'reaction' | 'follow' | 'comment';
   post_id: string | null;
   reaction_type: string | null;
   is_read: boolean;

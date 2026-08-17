@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@context/AuthContext';
 import {
@@ -9,6 +9,7 @@ import {
   type Post,
   type Reaction,
 } from '@lib/posts';
+import { fetchCommentCount, fetchComments, createComment, deleteComment, type Comment } from '@lib/comments';
 
 const timeAgo = (iso: string) => {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -37,6 +38,66 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState('');
+
+  const [commentCount, setCommentCount] = useState(0);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [postingComment, setPostingComment] = useState(false);
+
+  useEffect(() => {
+    fetchCommentCount(post.id).then(setCommentCount).catch(() => {});
+  }, [post.id]);
+
+  const loadComments = async () => {
+    setLoadingComments(true);
+    try {
+      setComments(await fetchComments(post.id));
+    } catch (err: any) {
+      setError(err.message || 'Could not load comments');
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleToggleComments = () => {
+    const next = !showComments;
+    setShowComments(next);
+    if (next && comments.length === 0) loadComments();
+  };
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || newComment.trim().length === 0) return;
+    setPostingComment(true);
+    setError('');
+    try {
+      await createComment({
+        postId: post.id,
+        authorId: user.id,
+        authorUsername: user.user_metadata?.username || user.email,
+        content: newComment.trim(),
+      });
+      setNewComment('');
+      await loadComments();
+      setCommentCount((c) => c + 1);
+    } catch (err: any) {
+      setError(err.message || 'Could not post that comment');
+    } finally {
+      setPostingComment(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await deleteComment(commentId);
+      await loadComments();
+      setCommentCount((c) => Math.max(0, c - 1));
+    } catch (err: any) {
+      setError(err.message || 'Could not delete that comment');
+    }
+  };
 
   const handleReact = async (type: (typeof REACTION_TYPES)[number]['type']) => {
     if (!user) return;
@@ -156,6 +217,14 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
           );
         })}
 
+        <button
+          onClick={handleToggleComments}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border border-gray-600 text-gray-400 hover:border-emerald-500 hover:text-emerald-300"
+        >
+          <span>💬</span>
+          <span className="text-sm">{commentCount}</span>
+        </button>
+
         {isOwn && !isEditing && !post.is_historic && (
           <div className="ml-auto flex items-center gap-3">
             <button onClick={() => setIsEditing(true)} className="text-sm text-emerald-300 hover:text-emerald-100">
@@ -179,6 +248,53 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
           </div>
         )}
       </div>
+
+      {showComments && (
+        <div className="mt-4 pt-4 border-t border-emerald-700/50 space-y-3">
+          {loadingComments ? (
+            <p className="text-sm text-gray-400">Loading comments…</p>
+          ) : comments.length === 0 ? (
+            <p className="text-sm text-gray-400">No comments yet. Be the first.</p>
+          ) : (
+            comments.map((c) => (
+              <div key={c.id} className="flex items-start justify-between gap-2">
+                <div>
+                  <span className="text-sm font-bold text-emerald-300">{c.author_username}</span>{' '}
+                  <span className="text-sm text-white/90">{c.content}</span>
+                  <p className="text-xs text-gray-500">{timeAgo(c.created_at)}</p>
+                </div>
+                {user?.id === c.author_id && (
+                  <button
+                    onClick={() => handleDeleteComment(c.id)}
+                    className="text-xs text-red-400 hover:text-red-300 shrink-0"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            ))
+          )}
+
+          {user && (
+            <form onSubmit={handleAddComment} className="flex gap-2 pt-1">
+              <input
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                maxLength={300}
+                placeholder="Write a comment…"
+                className="flex-1 bg-transparent border border-emerald-500 rounded p-2 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              />
+              <button
+                type="submit"
+                disabled={postingComment || newComment.trim().length === 0}
+                className="bg-emerald-500 text-black text-sm font-bold px-3 py-2 rounded hover:bg-emerald-600 disabled:opacity-40"
+              >
+                {postingComment ? '...' : 'Reply'}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
     </article>
   );
 };

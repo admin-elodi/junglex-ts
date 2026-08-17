@@ -90,6 +90,14 @@ const Notifications = () => {
                   </Link>{' '}
                   reacted to your post
                 </p>
+              ) : n.type === 'comment' ? (
+                <p className="text-white">
+                  <span className="mr-1">💬</span>
+                  <Link to={`/app/u/${n.actor_username}`} className="font-bold text-emerald-300 hover:text-emerald-100">
+                    {n.actor_username}
+                  </Link>{' '}
+                  commented on your post
+                </p>
               ) : (
                 <p className="text-white">
                   <span className="mr-1">🐾</span>
