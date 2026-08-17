@@ -24,6 +24,15 @@ export const fetchProfileByUsername = async (username: string): Promise<Profile 
   return data;
 };
 
+export const fetchProfilesByIds = async (ids: string[]): Promise<Record<string, Profile>> => {
+  if (ids.length === 0) return {};
+  const { data, error } = await supabase.from('profiles').select('*').in('id', ids);
+  if (error) throw error;
+  const map: Record<string, Profile> = {};
+  for (const p of data ?? []) map[p.id] = p;
+  return map;
+};
+
 export const updateProfile = async (
   id: string,
   updates: { username?: string; spirit_animal?: string; bio?: string }

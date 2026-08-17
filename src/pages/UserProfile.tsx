@@ -137,7 +137,13 @@ const UserProfile = () => {
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} reactions={reactionsForPost(post.id)} onChanged={loadAll} />
+            <PostCard
+              key={post.id}
+              post={post}
+              reactions={reactionsForPost(post.id)}
+              authorUsername={profile.username}
+              onChanged={loadAll}
+            />
           ))}
         </div>
       )}

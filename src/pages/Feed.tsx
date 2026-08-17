@@ -3,6 +3,7 @@ import { useAuth } from '@context/AuthContext';
 import { supabase } from '@lib/supabase';
 import { createPost, fetchPosts, fetchReactionsForPosts, type Post, type Reaction } from '@lib/posts';
 import { fetchFollowingIds } from '@lib/follows';
+import { fetchProfilesByIds, type Profile } from '@lib/profiles';
 import PostCard from '@components/feed/PostCard';
 
 type Tab = 'everyone' | 'following';
@@ -12,6 +13,7 @@ const Feed = () => {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [authorProfiles, setAuthorProfiles] = useState<Record<string, Profile>>({});
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [tab, setTab] = useState<Tab>('everyone');
   const [content, setContent] = useState('');
@@ -27,6 +29,8 @@ const Feed = () => {
       setPosts(fetchedPosts);
       const fetchedReactions = await fetchReactionsForPosts(fetchedPosts.map((p) => p.id));
       setReactions(fetchedReactions);
+      const authorIds = [...new Set(fetchedPosts.map((p) => p.author_id).filter((id): id is string => !!id))];
+      setAuthorProfiles(await fetchProfilesByIds(authorIds));
       if (user) {
         setFollowingIds(await fetchFollowingIds(user.id));
       }
@@ -167,6 +171,7 @@ const Feed = () => {
               key={post.id}
               post={post}
               reactions={reactionsByPost[post.id] ?? []}
+              authorUsername={post.author_id ? authorProfiles[post.author_id]?.username : undefined}
               onChanged={loadAll}
             />
           ))}

@@ -25,10 +25,11 @@ const timeAgo = (iso: string) => {
 type Props = {
   post: Post;
   reactions: Reaction[];
+  authorUsername?: string; // current profile username, if known — falls back to the post's stored snapshot
   onChanged: () => void; // called after react/edit/delete so the parent can refetch
 };
 
-const PostCard = ({ post, reactions, onChanged }: Props) => {
+const PostCard = ({ post, reactions, authorUsername, onChanged }: Props) => {
   const { user } = useAuth();
   const isOwn = !!user && user.id === post.author_id;
 
@@ -149,10 +150,10 @@ const PostCard = ({ post, reactions, onChanged }: Props) => {
       <div className="flex items-center justify-between mb-2">
         {post.author_id ? (
           <Link
-            to={isOwn ? '/app/profile' : `/app/u/${post.author_username}`}
+            to={isOwn ? '/app/profile' : `/app/u/${authorUsername ?? post.author_username}`}
             className="text-white font-bold hover:text-emerald-300"
           >
-            {post.author_username}
+            {authorUsername ?? post.author_username}
           </Link>
         ) : (
           <p className="text-white font-bold">{post.author_username}</p>
