@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@context/AuthContext';
 import { fetchProfileById, updateProfile, type Profile as ProfileType } from '@lib/profiles';
+import { formatHandle } from '@lib/handle';
 import { fetchFollowCounts } from '@lib/follows';
 import { fetchPostsByAuthor, fetchReactionsForPosts, type Post, type Reaction } from '@lib/posts';
 import PostCard from '@components/feed/PostCard';
@@ -128,6 +129,9 @@ const Profile = () => {
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-xl text-white font-bold">{profile?.username ?? user?.email}</h2>
+                {profile?.handle_number !== undefined && (
+                  <p className="text-emerald-400 text-sm">{formatHandle(profile.handle_number)}</p>
+                )}
                 {profile?.spirit_animal && (
                   <p className="text-emerald-300 text-sm mt-1">Spirit animal: {profile.spirit_animal}</p>
                 )}
@@ -175,6 +179,7 @@ const Profile = () => {
               post={post}
               reactions={reactionsForPost(post.id)}
               authorUsername={profile?.username}
+              authorHandle={profile?.handle_number}
               onChanged={loadAll}
             />
           ))}

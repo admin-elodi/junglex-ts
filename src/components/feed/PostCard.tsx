@@ -11,6 +11,7 @@ import {
 } from '@lib/posts';
 import { fetchCommentCount, fetchComments, createComment, deleteComment, type Comment } from '@lib/comments';
 import { fetchProfilesByIds, type Profile } from '@lib/profiles';
+import { formatHandle, handleToPath } from '@lib/handle';
 
 const timeAgo = (iso: string) => {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -27,10 +28,11 @@ type Props = {
   post: Post;
   reactions: Reaction[];
   authorUsername?: string; // current profile username, if known — falls back to the post's stored snapshot
+  authorHandle?: number; // the author's permanent #N handle — required to link to their profile
   onChanged: () => void; // called after react/edit/delete so the parent can refetch
 };
 
-const PostCard = ({ post, reactions, authorUsername, onChanged }: Props) => {
+const PostCard = ({ post, reactions, authorUsername, authorHandle, onChanged }: Props) => {
   const { user } = useAuth();
   const isOwn = !!user && user.id === post.author_id;
 
@@ -153,15 +155,18 @@ const PostCard = ({ post, reactions, authorUsername, onChanged }: Props) => {
       )}
 
       <div className="flex items-center justify-between mb-2">
-        {post.author_id ? (
+        {post.author_id && (isOwn || authorHandle !== undefined) ? (
           <Link
-            to={isOwn ? '/app/profile' : `/app/u/${authorUsername ?? post.author_username}`}
+            to={isOwn ? '/app/profile' : `/app/u/${handleToPath(authorHandle!)}`}
             className="text-white font-bold hover:text-emerald-300"
           >
             {authorUsername ?? post.author_username}
+            {authorHandle !== undefined && (
+              <span className="text-emerald-400 font-normal"> {formatHandle(authorHandle)}</span>
+            )}
           </Link>
         ) : (
-          <p className="text-white font-bold">{post.author_username}</p>
+          <p className="text-white font-bold">{authorUsername ?? post.author_username}</p>
         )}
         <p className="text-sm text-emerald-200">
           {timeAgo(post.created_at)}
@@ -262,25 +267,45 @@ const PostCard = ({ post, reactions, authorUsername, onChanged }: Props) => {
           ) : comments.length === 0 ? (
             <p className="text-sm text-gray-400">No comments yet. Be the first.</p>
           ) : (
-            comments.map((c) => (
-              <div key={c.id} className="flex items-start justify-between gap-2">
-                <div>
-                  <span className="text-sm font-bold text-emerald-300">
-                    {commentAuthorProfiles[c.author_id]?.username ?? c.author_username}
-                  </span>{' '}
-                  <span className="text-sm text-white/90">{c.content}</span>
-                  <p className="text-xs text-gray-500">{timeAgo(c.created_at)}</p>
+            comments.map((c) => {
+              const commentAuthorProfile = commentAuthorProfiles[c.author_id];
+              const isOwnComment = user?.id === c.author_id;
+              const commentAuthorName = commentAuthorProfile?.username ?? c.author_username;
+
+              return (
+                <div key={c.id} className="flex items-start justify-between gap-2">
+                  <div>
+                    {isOwnComment || commentAuthorProfile ? (
+                      <Link
+                        to={
+                          isOwnComment
+                            ? '/app/profile'
+                            : `/app/u/${handleToPath(commentAuthorProfile!.handle_number)}`
+                        }
+                        className="text-sm font-bold text-emerald-300 hover:text-emerald-100"
+                      >
+                        {commentAuthorName}
+                        {commentAuthorProfile && (
+                          <span className="font-normal"> {formatHandle(commentAuthorProfile.handle_number)}</span>
+                        )}
+                      </Link>
+                    ) : (
+                      <span className="text-sm font-bold text-emerald-300">{commentAuthorName}</span>
+                    )}{' '}
+                    <span className="text-sm text-white/90">{c.content}</span>
+                    <p className="text-xs text-gray-500">{timeAgo(c.created_at)}</p>
+                  </div>
+                  {isOwnComment && (
+                    <button
+                      onClick={() => handleDeleteComment(c.id)}
+                      className="text-xs text-red-400 hover:text-red-300 shrink-0"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
-                {user?.id === c.author_id && (
-                  <button
-                    onClick={() => handleDeleteComment(c.id)}
-                    className="text-xs text-red-400 hover:text-red-300 shrink-0"
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
 
           {user && (

@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '@context/AuthContext';
-import { fetchProfileByUsername, type Profile as ProfileType } from '@lib/profiles';
+import { fetchProfileByHandle, type Profile as ProfileType } from '@lib/profiles';
+import { formatHandle, parseHandleParam } from '@lib/handle';
 import { fetchFollowCounts, isFollowing, follow, unfollow } from '@lib/follows';
 import { fetchPostsByAuthor, fetchReactionsForPosts, type Post, type Reaction } from '@lib/posts';
 import PostCard from '@components/feed/PostCard';
 
 const UserProfile = () => {
-  const { username } = useParams<{ username: string }>();
+  const { handle } = useParams<{ handle: string }>();
+  const handleNumber = parseHandleParam(handle);
   const { user } = useAuth();
 
   const [profile, setProfile] = useState<ProfileType | null>(null);
@@ -21,9 +23,13 @@ const UserProfile = () => {
   const [error, setError] = useState('');
 
   const loadAll = async () => {
-    if (!username) return;
+    if (handleNumber === null) {
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
     try {
-      const fetchedProfile = await fetchProfileByUsername(username);
+      const fetchedProfile = await fetchProfileByHandle(handleNumber);
       if (!fetchedProfile) {
         setNotFound(true);
         return;
@@ -53,7 +59,7 @@ const UserProfile = () => {
     setNotFound(false);
     loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [username, user?.id]);
+  }, [handle, user?.id]);
 
   const reactionsForPost = (postId: string) => reactions.filter((r) => r.post_id === postId);
 
@@ -98,6 +104,7 @@ const UserProfile = () => {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-xl text-white font-bold">{profile.username}</h1>
+            <p className="text-emerald-400 text-sm">{formatHandle(profile.handle_number)}</p>
             {profile.spirit_animal && (
               <p className="text-emerald-300 text-sm mt-1">Spirit animal: {profile.spirit_animal}</p>
             )}
@@ -142,6 +149,7 @@ const UserProfile = () => {
               post={post}
               reactions={reactionsForPost(post.id)}
               authorUsername={profile.username}
+              authorHandle={profile.handle_number}
               onChanged={loadAll}
             />
           ))}

@@ -5,6 +5,7 @@ export type Profile = {
   username: string;
   spirit_animal: string | null;
   bio: string | null;
+  handle_number: number;
   created_at: string;
 };
 
@@ -14,11 +15,11 @@ export const fetchProfileById = async (id: string): Promise<Profile | null> => {
   return data;
 };
 
-export const fetchProfileByUsername = async (username: string): Promise<Profile | null> => {
+export const fetchProfileByHandle = async (handleNumber: number): Promise<Profile | null> => {
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('username', username)
+    .eq('handle_number', handleNumber)
     .maybeSingle();
   if (error) throw error;
   return data;
